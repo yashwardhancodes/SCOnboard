@@ -66,7 +66,7 @@ const AdminDashboard: React.FC = () => {
       </nav>
 
       <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+        <div className="flex flex-row items-center justify-between mb-8 gap-4">
             {/* ... (Header and view toggles remain the same) ... */}
             <div className='pl-2'>
             <h2 className="text-2xl font-bold text-slate-800">Service Centers</h2>
