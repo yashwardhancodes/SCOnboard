@@ -1,12 +1,23 @@
-import { useState} from "react";
+import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
+// 1. Import the correct types
 import type { ServiceFormData, FormErrors } from "../types/ServiceFormData";
 import { getCurrentPosition, reverseGeocode } from "../services/location";
 import { submitServiceForm } from "../services/api";
 
+// 2. This now perfectly matches the `ServiceFormData` type. No more error!
 const INITIAL_STATE: ServiceFormData = {
-  centerName: "", phone: "", email: "", city: "", state: "", zipCode: "",
-  country: "India", latitude: "", longitude: "", categories: [], images: [],
+  centerName: "",
+  phone: "",
+  email: "",
+  city: "",
+  state: "",
+  zipCode: "",
+  country: "India",
+  latitude: "",
+  longitude: "",
+  categories: [],
+  imagePaths: [], // Use the correct property name
 };
 
 export const useServiceForm = () => {
@@ -19,7 +30,6 @@ export const useServiceForm = () => {
     submitting: false,
   });
 
-  // --- Helpers ---
   const updateField = (name: keyof ServiceFormData, value: any) => {
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name as keyof FormErrors]) {
@@ -27,7 +37,6 @@ export const useServiceForm = () => {
     }
   };
 
-  // --- Handlers ---
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     updateField(e.target.name as keyof ServiceFormData, e.target.value);
   };
@@ -39,17 +48,19 @@ export const useServiceForm = () => {
     updateField("categories", newCats);
   };
 
+  // 2. Corrected handleImageChange
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      setFormData(prev => ({ ...prev, images: [...prev.images, ...files] }));
+      setFormData(prev => ({ ...prev, imagePaths: [...prev.imagePaths, ...files] }));
       setPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
-      setErrors(prev => ({ ...prev, images: undefined }));
+      setErrors(prev => ({ ...prev, imagePaths: undefined }));
     }
   };
 
+  // 3. Corrected removeImage
   const removeImage = (index: number) => {
-    setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
+    setFormData(prev => ({ ...prev, imagePaths: prev.imagePaths.filter((_, i) => i !== index) }));
     setPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -83,7 +94,8 @@ export const useServiceForm = () => {
       setStatus(prev => ({ ...prev, fetchingAddress: false }));
     }
   };
-
+  
+  // 4. Corrected validate
   const validate = () => {
     const newErrors: FormErrors = {};
     if (!formData.centerName.trim()) newErrors.centerName = "Required";
@@ -94,7 +106,7 @@ export const useServiceForm = () => {
     if (!/^\d{6}$/.test(formData.zipCode)) newErrors.zipCode = "Invalid Zip";
     if (!formData.latitude) newErrors.location = "Required";
     if (formData.categories.length === 0) newErrors.categories = "Select one";
-    if (formData.images.length === 0) newErrors.images = "Upload one";
+    if (formData.imagePaths.length === 0) newErrors.imagePaths = "Upload one";
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -102,16 +114,16 @@ export const useServiceForm = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!validate()) return alert("Fix errors");
+    if (!validate()) return alert("Please fix all errors before submitting.");
 
     setStatus(prev => ({ ...prev, submitting: true }));
     try {
       await submitServiceForm(formData);
-      alert("Success!");
+      alert("Form submitted successfully!");
       setFormData(INITIAL_STATE);
       setPreviews([]);
     } catch (error: any) {
-      alert(error.message);
+      alert(error.message || "An unknown error occurred.");
     } finally {
       setStatus(prev => ({ ...prev, submitting: false }));
     }

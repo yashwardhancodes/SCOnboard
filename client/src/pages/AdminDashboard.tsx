@@ -2,28 +2,33 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Phone, Mail, Calendar, LogOut, Map as MapIcon, Grid } from 'lucide-react';
 import ServiceMap from '../components/ServiceMap';
-import type { ServiceCenter } from '../types/ServiceFormData';
+// 1. IMPORT THE CORRECT TYPE for data coming FROM the API
+import type { ServiceCenterResponse } from '../types/ServiceFormData';
 
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [centers, setCenters] = useState<ServiceCenter[]>([]);
+  // 2. USE THE CORRECT TYPE for the state
+  const [centers, setCenters] = useState<ServiceCenterResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
+
   useEffect(() => {
-    // 1. Check Auth
+    // Check Auth
     const isAuth = localStorage.getItem('adminAuthenticated');
     if (!isAuth) {
       navigate('/admin');
       return;
     }
 
-    // 2. Fetch Data
+    // Fetch Data
     const fetchData = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/'}`);       
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://serviceonboard.onrender.com/api/service-center'}`);       
         if (!response.ok) throw new Error('Network response was not ok');
-        const data: ServiceCenter[] = await response.json();
+        
+        // 3. This line now matches the state type perfectly
+        const data: ServiceCenterResponse[] = await response.json();
         setCenters(data);
       } catch (error) {
         alert("Unable to load service centers");
@@ -69,7 +74,6 @@ const AdminDashboard: React.FC = () => {
             <h2 className="text-2xl font-bold text-slate-800">Service Centers</h2>
             <p className="text-slate-500">Total active locations: {centers.length}</p>
           </div>
-
           <div className="bg-white p-1 rounded-lg border border-slate-200 flex items-center shadow-sm w-fit self-start md:self-auto">
             <button
               onClick={() => setViewMode('grid')}
@@ -97,15 +101,17 @@ const AdminDashboard: React.FC = () => {
         {/* View Switcher */}
         {viewMode === 'map' ? (
           <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            {/* IMPORTANT: Make sure ServiceMap component also expects ServiceCenterResponse[] */}
             <ServiceMap locations={centers} />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {centers.map((center) => (
+              // 4. `center.id` is now valid and has no error
               <div key={center.id} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition duration-300 flex flex-col">
                 
-                {/* Image */}
                 <div className="h-48 bg-slate-200 w-full relative">
+                  {/* 5. `center.imagePaths` is now string[], so `src` works perfectly */}
                   {center.imagePaths && center.imagePaths.length > 0 ? (
                     <img src={center.imagePaths[0]} alt={center.centerName} className="w-full h-full object-cover" />
                   ) : (
@@ -113,16 +119,15 @@ const AdminDashboard: React.FC = () => {
                   )}
                 </div>
 
-                {/* Info Body */}
                 <div className="p-5 flex-1 flex flex-col">
+                  {/* ... other fields are fine */}
                   <h3 className="text-lg font-bold text-slate-800 mb-1">{center.centerName}</h3>
-                  
                   <div className="flex items-center text-slate-500 text-sm mb-4">
                     <MapPin className="w-4 h-4 mr-1 text-blue-500" />
                     <span className="truncate">{center.city}, {center.state}</span>
                   </div>
-
-                  <div className="space-y-2 text-sm text-slate-600 mb-6 flex-1">
+                  {/* ... phone, email etc ... */}
+                   <div className="space-y-2 text-sm text-slate-600 mb-6 flex-1">
                     <div className="flex items-center">
                       <Phone className="w-4 h-4 mr-2 text-slate-400" />
                       {center.phone}
@@ -132,10 +137,9 @@ const AdminDashboard: React.FC = () => {
                       <span className="truncate">{center.email}</span>
                     </div>
                   </div>
-
-                  {/* Categories */}
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {center.categories?.slice(0, 3).map((cat : any, i : any) => (
+                    {/* 6. Improved typing for the map callback */}
+                    {center.categories?.slice(0, 3).map((cat: string, i: number) => (
                       <span key={i} className="bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-md border border-slate-200">
                         {cat}
                       </span>
@@ -147,6 +151,7 @@ const AdminDashboard: React.FC = () => {
 
                   <div className="pt-4 border-t border-slate-100 flex items-center text-xs text-slate-400">
                     <Calendar className="w-3 h-3 mr-1" />
+                    {/* 7. `center.createdAt` is now valid and has no error */}
                     Created: {new Date(center.createdAt).toLocaleDateString()}
                   </div>
                 </div>

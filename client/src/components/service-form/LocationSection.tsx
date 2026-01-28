@@ -1,8 +1,10 @@
 import { Loader2, Map, MapPin } from "lucide-react";
-import type {FormErrors, ServiceCenter } from "../../types/ServiceFormData";
+// 1. IMPORT the correct types for the form
+import type { FormErrors, ServiceFormData } from "../../types/ServiceFormData"; // Adjust path if needed
 
 interface Props {
-  formData: ServiceCenter;
+  // 2. UPDATE the type here to match the form's state
+  formData: ServiceFormData;
   errors: FormErrors;
   status: { locating: boolean; fetchingAddress: boolean };
   onGetLocation: () => void;
@@ -21,14 +23,9 @@ export const LocationSection = ({ formData, errors, status, onGetLocation, onAut
           <label className="block text-xs font-medium text-gray-500 mb-1">Latitude</label>
           <input 
             type="text" 
-       onPaste={(e) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData("text");
-    onChange({
-      target: { name: "latitude", value: pasted }
-    } as React.ChangeEvent<HTMLInputElement>);
-  }}
+            name="latitude"
             value={formData.latitude} 
+            onChange={onChange} // Simplified: Your useServiceForm's handleChange already handles this
             placeholder="Latitude" 
             className="w-full border p-2 rounded bg-gray-50 text-gray-500" 
           />
@@ -37,14 +34,9 @@ export const LocationSection = ({ formData, errors, status, onGetLocation, onAut
           <label className="block text-xs font-medium text-gray-500 mb-1">Longitude</label>
           <input 
             type="text" 
-     onPaste={(e) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData("text");
-    onChange({
-      target: { name: "longitude", value: pasted }
-    } as React.ChangeEvent<HTMLInputElement>);
-  }}
+            name="longitude"
             value={formData.longitude} 
+            onChange={onChange} // Simplified
             placeholder="Longitude" 
             className="w-full border p-2 rounded bg-gray-50 text-gray-500" 
           />
