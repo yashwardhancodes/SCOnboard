@@ -1,6 +1,6 @@
 import type { ServiceFormData } from "../types/ServiceFormData";
 
-const API_URL = "https://serviceonboard.mech-moto.in/api/service-center";
+const API_URL = "https://serviceonboard-v9hq.onrender.com/api/service-center";
 
 // Optional: type your API response
 interface SubmitServiceResponse {
